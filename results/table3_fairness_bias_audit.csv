@@ -1,0 +1,12 @@
+Identity Group / Term,False Positive Rate (FPR) (↓),Disparity Gap vs Overall
+Overall (All Normal Posts),0.2621,0.0
+muslim,0.1538,-0.1083
+jewish,0.2609,-0.0013
+black,0.3077,0.0455
+gay,0.2692,0.0071
+woman,0.125,-0.1371
+women,0.1774,-0.0847
+hindu,0.0,-0.2621
+christian,0.2897,0.0275
+dalit,0.2787,0.0166
+white,0.2105,-0.0516

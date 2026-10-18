@@ -1,0 +1,6 @@
+Method,Token-F1 (↑),IoU (↑),Comprehensiveness (↑),Sufficiency (↓)
+Random Top-k,0.3265,0.2803,0.1455,0.3229
+LIME (XLM-R),0.7147,0.6501,0.4939,-0.04
+SHAP (XLM-R),0.7875,0.7248,0.5496,-0.0589
+SFT-LLM Rationale (Qwen-1.5B),0.4211,0.3626,-0.0,-0.0
+SFT+DPO LLM Rationale (Ours),0.6104,0.5341,0.0,0.0
