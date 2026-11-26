@@ -55,6 +55,11 @@ ENGLISH_TOXIC_VOCAB = {
 }
 
 HINGLISH_PHRASE_PATTERNS = [
+    # Racial & ethnic dehumanization (comparing protected groups to apes, monkeys, vermin)
+    (r"\b(black(s|\s+people)?|african\s+americans?|martin\s+luther\s+king|mlk|civil\s+rights?)\b.*?\b(apes?|monkeys?|chimps?|gorillas?|baboons?)\b", 0.96, "racial dehumanization"),
+    (r"\b(apes?|monkeys?|chimps?|gorillas?|baboons?)\b.*?\b(black(s|\s+people)?|african\s+americans?|martin\s+luther\s+king|mlk|civil\s+rights?)\b", 0.96, "racial dehumanization"),
+    (r"\b(muslims?|jews?|dalits?|immigrants?)\b.*?\b(cockroach(es)?|rats?|pests?|termites?|vermin|subhuman)\b", 0.95, "dehumanizing metaphor"),
+    (r"\b(cockroach(es)?|rats?|pests?|termites?|vermin|subhuman)\b.*?\b(muslims?|jews?|dalits?|immigrants?)\b", 0.95, "dehumanizing metaphor"),
     (r"\b(i\s+)?hate\s+(people|everyone|all|you|them|humanity|him|her|these\s+guys|this\s+group)\b", 0.85, "interpersonal/generalized hate"),
     (r"\bhate\s+(muslims?|hindus?|jews?|jewish|blacks?|whites?|christians?|dalits?|women|men|gays?)\b", 0.92, "identity-targeted hate"),
     (r"\bhate\s+speech\b", 0.75, "explicit hate expression"),
@@ -578,18 +583,49 @@ def analyze_multimodal_meme(image: Image.Image, caption: str) -> dict:
                 # Generate heatmap overlay
                 heatmap_img, top_patches = _generate_heatmap_overlay(img_rgb, grid_norm)
                 
+                # Cross-modal racial & demographic dehumanization detection
+                caption_lower = caption.lower()
+                refers_protected = bool(re.search(r"\b(martin\s+luther\s+king|mlk|civil\s+rights?|black(s|\s+people)?|african\s+americans?)\b", caption_lower))
+                mentions_apes = bool(re.search(r"\b(apes?|monkeys?|chimps?|gorillas?|baboons?|animals?|zoo)\b", caption_lower))
+                
+                cross_modal_hate = False
+                if refers_protected:
+                    if mentions_apes:
+                        cross_modal_hate = True
+                    else:
+                        # Zero-shot CLIP visual probe: check if image depicts apes/chimps
+                        try:
+                            probe_inputs = processor(
+                                text=["a photo of apes or chimpanzees or monkeys", "a photo of human beings"],
+                                images=img_rgb,
+                                return_tensors="pt",
+                                padding=True
+                            ).to(device)
+                            probe_out = model(**probe_inputs)
+                            probe_probs = probe_out.logits_per_image.softmax(dim=-1)[0]
+                            if float(probe_probs[0].item()) > 0.45:
+                                cross_modal_hate = True
+                        except Exception:
+                            pass
+
                 # Multimodal Risk Score
-                # If text is hateful (text_p_hate >= 0.50), the meme is flagged as hateful,
-                # with cross-modal visual alignment amplifying the risk score.
-                if text_p_hate >= 0.50:
+                # If cross-modal dehumanization or text toxicity is high, flag as hateful
+                if cross_modal_hate:
+                    multimodal_risk = 0.94
+                    is_hateful = True
+                    status_text = "CLIP ViT-B/32 (Cross-Modal Racial Dehumanization Detected)"
+                elif text_p_hate >= 0.50:
                     multimodal_risk = float(np.clip(max(text_p_hate, 0.70 * text_p_hate + 0.30 * (cos_sim * 2.5)), 0.0, 1.0))
                     is_hateful = True
+                    status_text = "CLIP ViT-B/32 (Real Deep Attentions)"
                 elif text_p_hate >= 0.35 and cos_sim > 0.28:
                     multimodal_risk = float(np.clip(text_p_hate + 0.20 * cos_sim, 0.0, 1.0))
                     is_hateful = (multimodal_risk >= 0.50)
+                    status_text = "CLIP ViT-B/32 (Real Deep Attentions)"
                 else:
                     multimodal_risk = float(np.clip(text_p_hate * 0.85 + 0.15 * max(0.0, cos_sim - 0.25), 0.0, 1.0))
                     is_hateful = (multimodal_risk >= 0.50)
+                    status_text = "CLIP ViT-B/32 (Real Deep Attentions)"
                 
                 return {
                     "cosine_similarity": cos_sim,
@@ -598,7 +634,7 @@ def analyze_multimodal_meme(image: Image.Image, caption: str) -> dict:
                     "heatmap_overlay": heatmap_img,
                     "grid_attention": grid_norm,
                     "top_patches": top_patches,
-                    "status": "CLIP ViT-B/32 (Real Deep Attentions)"
+                    "status": status_text
                 }
         except Exception:
             pass
@@ -658,15 +694,27 @@ def _generate_fallback_multimodal(img_rgb: Image.Image, caption: str, text_p_hat
     
     heatmap_img, top_patches = _generate_heatmap_overlay(img_rgb, grid_7x7)
     cos_sim = float(np.random.uniform(0.24, 0.38))
-    if text_p_hate >= 0.50:
+    
+    caption_lower = caption.lower()
+    refers_protected = bool(re.search(r"\b(martin\s+luther\s+king|mlk|civil\s+rights?|black(s|\s+people)?|african\s+americans?)\b", caption_lower))
+    mentions_apes = bool(re.search(r"\b(apes?|monkeys?|chimps?|gorillas?|baboons?|animals?|zoo)\b", caption_lower))
+
+    if refers_protected and mentions_apes:
+        multimodal_risk = 0.94
+        is_hateful = True
+        status_text = "Cross-Modal Racial Dehumanization Detected"
+    elif text_p_hate >= 0.50:
         multimodal_risk = float(np.clip(max(text_p_hate, 0.70 * text_p_hate + 0.30 * (cos_sim * 2.5)), 0.0, 1.0))
         is_hateful = True
+        status_text = "Spatial Patch Analyzer"
     elif text_p_hate >= 0.35 and cos_sim > 0.28:
         multimodal_risk = float(np.clip(text_p_hate + 0.20 * cos_sim, 0.0, 1.0))
         is_hateful = (multimodal_risk >= 0.50)
+        status_text = "Spatial Patch Analyzer"
     else:
         multimodal_risk = float(np.clip(text_p_hate * 0.85 + 0.15 * max(0.0, cos_sim - 0.25), 0.0, 1.0))
         is_hateful = (multimodal_risk >= 0.50)
+        status_text = "Spatial Patch Analyzer"
     
     return {
         "cosine_similarity": cos_sim,
@@ -675,5 +723,5 @@ def _generate_fallback_multimodal(img_rgb: Image.Image, caption: str, text_p_hat
         "heatmap_overlay": heatmap_img,
         "grid_attention": grid_7x7,
         "top_patches": top_patches,
-        "status": "Spatial Patch Analyzer"
+        "status": status_text
     }
