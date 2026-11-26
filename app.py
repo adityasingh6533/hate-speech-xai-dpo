@@ -206,36 +206,48 @@ if selected_tab == "⚡ 1. Live Text Moderation & Real-Time XAI":
     **Leave-One-Out Perturbation Attribution** to compute the exact marginal impact ($\Delta P$) of each word on the model's decision.
     """)
 
+    if "user_input_text" not in st.session_state:
+        st.session_state["user_input_text"] = ""
+
     # Quick preset sample buttons
-    st.markdown("##### 💡 Quick Test Presets (English & Hinglish):")
-    col_b1, col_b2, col_b3, col_b4, col_b5 = st.columns(5)
-    preset_text = None
+    st.markdown("##### 💡 Quick Test Presets (Click to load or type your own comment below):")
+    col_b1, col_b2, col_b3, col_b4, col_b5, col_b6 = st.columns(6)
     
     with col_b1:
-        if st.button("Explicit Hate (EN)", use_container_width=True):
-            preset_text = "well the weasel and ex coon is about to get his ass set on fire"
+        if st.button("Hate (EN)", use_container_width=True):
+            st.session_state["user_input_text"] = "well the weasel and ex coon is about to get his ass set on fire"
     with col_b2:
-        if st.button("Hinglish Hate (Targeted)", use_container_width=True):
-            preset_text = "tum log desh ke gaddar ho niklo yahan se"
+        if st.button("Hinglish Hate", use_container_width=True):
+            st.session_state["user_input_text"] = "tum log desh ke gaddar ho niklo yahan se"
     with col_b3:
-        if st.button("Hinglish Slur Attack", use_container_width=True):
-            preset_text = "saale kutte bhaunk mat apni aukaat mein reh"
+        if st.button("Abusive / Slurs", use_container_width=True):
+            st.session_state["user_input_text"] = "saale kutte bhad me ja apni aukaat mein reh"
     with col_b4:
-        if st.button("Hinglish Banter (Benign)", use_container_width=True):
-            preset_text = "bhai tu bilkul pagal hai kya mast movie thi yaar maza aa gaya"
+        if st.button("Friendly Banter", use_container_width=True):
+            st.session_state["user_input_text"] = "bhai tu bilkul pagal hai kya mast movie thi yaar maza aa gaya"
     with col_b5:
-        if st.button("Benign Identity / Festive", use_container_width=True):
-            preset_text = "diwali aur eid sabhi dost milkar dhoom dhaam se manate hain"
+        if st.button("Benign Identity", use_container_width=True):
+            st.session_state["user_input_text"] = "My neighbor is a proud Muslim woman who works as an ER doctor in our city."
+    with col_b6:
+        if st.button("🗑️ Clear Box", use_container_width=True):
+            st.session_state["user_input_text"] = ""
 
-    default_val = preset_text if preset_text else "tum log desh ke gaddar ho niklo yahan se"
-    user_text = st.text_area("Input Text for Real-Time Analysis:", value=default_val, height=95)
+    user_text = st.text_area(
+        "Type or paste ANY custom comment to moderate:",
+        value=st.session_state["user_input_text"],
+        height=95,
+        placeholder="Type whatever comment you want here in English or Hinglish (e.g. insults, abusive slurs, casual banter, or greetings)..."
+    )
 
     if st.button("🚀 Run Real-Time Moderation & XAI", type="primary", use_container_width=True):
-        with st.spinner("Executing real Transformer forward passes & computing Leave-One-Out perturbations..."):
-            # 1. Real Model Prediction
-            pred = predict_text(user_text)
-            # 2. Real Token Attribution Scores (Delta P)
-            attributions = explain_tokens(user_text)
+        if not user_text.strip():
+            st.warning("⚠️ Please type or paste a comment first (or click a sample preset above)!")
+        else:
+            with st.spinner("Executing real Transformer forward passes & computing Leave-One-Out perturbations..."):
+                # 1. Real Model Prediction
+                pred = predict_text(user_text)
+                # 2. Real Token Attribution Scores (Delta P)
+                attributions = explain_tokens(user_text)
 
             st.markdown("---")
             

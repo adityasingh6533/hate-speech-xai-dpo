@@ -25,38 +25,6 @@ Furthermore, we fine-tuned a 4-bit QLoRA `Qwen2.5-1.5B-Instruct` generative mode
 
 ---
 
-## Dataset Description & Statistics
-
-| Partition / Class | Posts | Share | Class Breakdown / Role |
-|---|---|---|---|
-| **Raw Corpus (Total)** | 20,148 | 100.0% | Normal: 8,153 (40.5%) • Hate: 6,234 (30.9%) • Offensive: 5,761 (28.6%) |
-| **Hate / Offensive (Combined $y=1$)** | 11,995 | 59.5% | Hateful / abusive target class |
-| **Official Train (80%)** | 15,383 | 80.0% | $y=1$: 9,132 • $y=0$: 6,251 |
-| **Official Validation (10%)** | 1,922 | 10.0% | Checkpoint selection & early stopping |
-| **Official Test (10%)** | 1,924 | 10.0% | $y=1$: 1,142 • $y=0$: 782 |
-| **Test Human Rationales** | 1,141 | 99.9% | Human rationale subset of $y=1$ test ($N=100$ XAI benchmark) |
-
----
-
-## Experimental Results & Analysis
-
-### Table 1: Held-Out Test Classification Performance ($N = 1,924$)
-| Model Architecture | Macro-F1 (↑) | Accuracy (↑) | AUROC (↑) |
-|---|---|---|---|
-| TF-IDF (1,2-gram) + Balanced LogReg | 0.7597 | 0.7656 | 0.8381 |
-| **XLM-RoBERTa-Base (Fine-Tuned)** | **0.7806** | **0.7890** | **0.8713** |
-| Qwen2.5-1.5B (4-bit QLoRA SFT) | 0.7471 | 0.7552 | 0.7915 |
-
-### Table 2: Explainability Benchmark ($N = 100$ Hateful Test Posts)
-| Method | Token-F1 (↑) | IoU (↑) | Comprehensiveness (↑) | Sufficiency (↓) |
-|---|---|---|---|---|
-| Random Top-$k$ Baseline | 0.3265 | 0.2803 | 0.1327 | 0.3428 |
-| Qwen2.5 SFT (Generative Rationales) | 0.4348 | 0.3757 | — | — |
-| **LIME (XLM-R)** | **0.7573** | 0.6855 | 0.5052 | **-0.0677** |
-| **SHAP (XLM-R)** | 0.7554 | **0.6874** | **0.5291** | -0.0604 |
-
----
-
 ## GITHUB REPOSITORY & TEAM CONTRIBUTIONS
 
 | Team Member | Core Responsibilities & Verified Deliverables |

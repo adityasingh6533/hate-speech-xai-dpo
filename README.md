@@ -16,11 +16,11 @@ Online content moderation requires models that are not only accurate across mult
 
 | Team Member | Core Responsibilities & Verified Deliverables |
 | :--- | :--- |
-| **Aditya Singh** | QLoRA 4-bit SFT (Qwen2.5-1.5B), TRL DPO training loop, and Reward Model + PPO. |
-| **Member 2 [Edit]** | HateXplain data processing, Counterfactual Data Augmentation (CDA), and fairness audit. |
-| **Member 3 [Edit]** | XLM-RoBERTa fine-tuning, Hinglish benchmark curation ($N=300$), and threat modeling. |
-| **Member 4 [Edit]** | SHAP & LIME XAI pipelines, Token-F1 benchmarking, and real-time token attribution. |
-| **Member 5 [Edit]** | CLIP ViT-B/32 multimodal meme pipeline, patch attention heatmaps, and Streamlit app. |
+| **Aditya Singh** | **Lead ML Architect & LLM Alignment:**<br>Colab GPU pipeline, Qwen2.5-1.5B 4-bit QLoRA SFT ($r=16, \alpha=32$), TRL DPO training loop (loss: $0.2543 \to 0.0060$), DistilRoBERTa Reward Model (100% acc) & PPO RL (+0.5430 mean reward). |
+| **Member 2 [Edit]** | **Data Engineering & Counterfactual Fairness:**<br>HateXplain preprocessing, multi-annotator agreement rules, Counterfactual Data Augmentation (CDA with 5,981 twins; $N=21,364$), 10-group FPR disparity audit & CFR metric ($0.1324 \to 0.0197$). |
+| **Member 3 [Edit]** | **Multilingual NLP & Hinglish Evaluation:**<br>XLM-RoBERTa cross-lingual fine-tuning, zero-duplicate Hinglish benchmark curation ($N=300$; Macro-F1: 0.5409, Acc: 63.67%), and code-mixed threat phrase / colloquial dampener modeling. |
+| **Member 4 [Edit]** | **Explainable AI (XAI) & Interpretability:**<br>SHAP & LIME token-attribution pipelines, evaluation against HateXplain human rationales (Sufficiency, Comprehensiveness, AOPC), and Leave-One-Out marginal perturbation ($\Delta P$) attribution engine. |
+| **Member 5 [Edit]** | **Multimodal Vision-Language & Web Deployment:**<br>CLIP ViT-B/32 cross-modal fusion on memes (held-out acc: 0.8750), Vision Transformer $7 \times 7$ spatial patch attention heatmap overlay, and interactive Streamlit web dashboard (`app.py`). |
 
 ---
 

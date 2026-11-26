@@ -47,38 +47,58 @@ SECONDARY_MODEL_ID = "cardiffnlp/twitter-roberta-base-hate-latest"
 # ---------------------------------------------------------------------------
 # Comprehensive Code-Mixed Hinglish & Multilingual Lexical-Semantic Knowledge
 # ---------------------------------------------------------------------------
+ENGLISH_TOXIC_VOCAB = {
+    "shit": 0.72, "bitch": 0.78, "bastard": 0.74, "asshole": 0.78, "dick": 0.68,
+    "cunt": 0.92, "fucking": 0.68, "fuck": 0.72, "scum": 0.75, "worthless": 0.68,
+    "subhuman": 0.88, "trash": 0.65, "disgusting": 0.58, "moron": 0.62, "idiot": 0.60,
+    "stupid": 0.50, "retard": 0.85, "nigger": 0.98, "faggot": 0.98, "kike": 0.98,
+    "coon": 0.95, "chink": 0.95, "whore": 0.82, "slut": 0.82, "kill yourself": 0.92
+}
+
 HINGLISH_PHRASE_PATTERNS = [
-    (r"\bdesh\s+ke\s+(gaddar|dushman)\b", 0.86, "communal/nationalistic hate"),
-    (r"\b(deshdrohi|aatankwadi)\b", 0.82, "terrorist/traitor accusation"),
-    (r"\brehne\s+ka\s+haq\s+nahi\b", 0.86, "dehumanizing exclusion"),
-    (r"\b(niklo|nikal)\s+yahan\s+se\b", 0.68, "exclusionary threat"),
-    (r"\blaat\s+maar\s+ke\b", 0.78, "violent threat"),
-    (r"\b(maro|maar\s+dalo)\s+saalo\b", 0.88, "violent incitement"),
-    (r"\b(bachna|chhodna)\s+nahi\s+chahiye\b", 0.82, "violent incitement"),
-    (r"\bshakal\s+dekh\s+ke\s+ghin\b", 0.76, "dehumanizing disgust"),
-    (r"\b(apni\s+)?aukaat\s+(kya\s+hai|mein\s+reh|dekh)\b", 0.72, "derogatory demeanment"),
-    (r"\bdo\s+kaudi\s+ke\b", 0.74, "severe insult"),
-    (r"\bgandi\s+naali\s+ke\s+(keede|keeda)\b", 0.90, "dehumanizing vermin slur"),
-    (r"\b(keede\s+makode|suar\s+ki\s+aulad)\b", 0.90, "dehumanizing insult"),
-    (r"\bbhaunk(na)?\s+(mat|band\s+kar)\b", 0.74, "dehumanizing canine slur"),
-    (r"\baatankwadi\s+hote\s+hain\b", 0.88, "hostile group generalization"),
-    (r"\bhaq\s+kha\s+rahe\s+hain\b", 0.80, "hostile communal targeting"),
-    (r"\bis\s+community\s+ke\s+sabhi\s+log\s+chor\b", 0.86, "group defamation"),
-    (r"\b(maro|peeto|thoko)\s+saalo\b", 0.85, "violent incitement"),
+    (r"\bdesh\s+ke\s+(gaddar|dushman)\b", 0.88, "communal/nationalistic hate"),
+    (r"\b(deshdrohi|aatankwadi)\b", 0.85, "terrorist/traitor accusation"),
+    (r"\brehne\s+ka\s+haq\s+nahi\b", 0.88, "dehumanizing exclusion"),
+    (r"\b(niklo|nikal)\s+yahan\s+se\b", 0.72, "exclusionary threat"),
+    (r"\blaat\s+maar\s+ke\b", 0.82, "violent threat"),
+    (r"\b(maro|maar\s+dalo)\s+saalo\b", 0.90, "violent incitement"),
+    (r"\b(bachna|chhodna)\s+nahi\s+chahiye\b", 0.85, "violent incitement"),
+    (r"\bshakal\s+dekh\s+ke\s+ghin\b", 0.78, "dehumanizing disgust"),
+    (r"\b(apni\s+)?aukaat\s+(kya\s+hai|mein\s+reh|dekh)\b", 0.75, "derogatory demeanment"),
+    (r"\bdo\s+kaudi\s+ke\b", 0.75, "severe insult"),
+    (r"\bgandi\s+naali\s+ke\s+(keede|keeda)\b", 0.92, "dehumanizing vermin slur"),
+    (r"\b(keede\s+makode|suar\s+ki\s+aulad)\b", 0.92, "dehumanizing insult"),
+    (r"\bbhaunk(na)?\s+(mat|band\s+kar)\b", 0.75, "dehumanizing canine slur"),
+    (r"\baatankwadi\s+hote\s+hain\b", 0.90, "hostile group generalization"),
+    (r"\bhaq\s+kha\s+rahe\s+hain\b", 0.82, "hostile communal targeting"),
+    (r"\bis\s+community\s+ke\s+sabhi\s+log\s+chor\b", 0.88, "group defamation"),
+    (r"\bbhad\s+me\s+(ja|jao)\b", 0.72, "hostile insult"),
+    (r"\b(tereko|tujhe)\s+(to\s+)?(main\s+)?dekh\s+lunga\b", 0.78, "direct personal threat"),
+    (r"\bpiece\s+of\s+shit\b", 0.85, "severe insult"),
+    (r"\bgo\s+to\s+hell\b", 0.68, "hostile insult"),
+    (r"\bkill\s+yourself\b", 0.95, "suicide incitement / severe threat"),
+    (r"\b(maro|peeto|thoko)\s+saalo\b", 0.88, "violent incitement"),
 ]
 
 HINGLISH_ABUSIVE_VOCAB = {
-    "chutiya": 0.65, "chutiye": 0.65, "chutiyapa": 0.50, "bhadwa": 0.65, "bhadwe": 0.65,
-    "madarchod": 0.88, "behenchod": 0.82, "bc": 0.65, "mc": 0.65, "laude": 0.72,
-    "lawde": 0.72, "lode": 0.72, "lodu": 0.60, "gandu": 0.70, "gaand": 0.65,
-    "harami": 0.62, "kamina": 0.55, "kamine": 0.55, "kutta": 0.52, "kutte": 0.55,
-    "kutti": 0.52, "suar": 0.58, "bhosadi": 0.78, "bhosdike": 0.82, "bhosadike": 0.82,
-    "randi": 0.82, "jhantu": 0.60, "tatti": 0.45, "bakchod": 0.40, "bakchodi": 0.35,
-    "katwe": 0.88, "katwa": 0.88, "mulle": 0.78, "mulla": 0.78, "jihadi": 0.82,
-    "deshdrohi": 0.82, "gaddar": 0.82, "aatankwadi": 0.88, "neech": 0.62, "chamar": 0.78,
-    "bhangi": 0.78, "ghatiya": 0.48, "aukaat": 0.46, "aukat": 0.46, "saale": 0.48,
-    "saala": 0.48, "subhuman": 0.85, "trash": 0.55, "disgusting": 0.50, "nigger": 0.95,
-    "faggot": 0.95, "kike": 0.95, "coon": 0.90, "terrorist": 0.72
+    # Severe slurs & swear words
+    "chutiya": 0.78, "chutiye": 0.78, "chutiyapa": 0.65, "bhadwa": 0.78, "bhadwe": 0.78,
+    "madarchod": 0.92, "behenchod": 0.88, "bc": 0.72, "mc": 0.72, "laude": 0.78,
+    "lawde": 0.78, "lode": 0.78, "lodu": 0.68, "gandu": 0.78, "gaand": 0.72,
+    "harami": 0.72, "kamina": 0.68, "kamine": 0.68, "kutta": 0.68, "kutte": 0.70,
+    "kutti": 0.68, "suar": 0.70, "bhosadi": 0.85, "bhosdike": 0.88, "bhosadike": 0.88,
+    "randi": 0.88, "jhantu": 0.70, "tatti": 0.58, "bakchod": 0.55, "bakchodi": 0.48,
+    
+    # Common insults & hostility
+    "saale": 0.68, "saala": 0.68, "ghatiya": 0.62, "aukaat": 0.62, "aukat": 0.62,
+    "bhad": 0.62, "bhaad": 0.62, "faad": 0.62, "marunga": 0.72, "pitai": 0.62,
+    "thok": 0.68, "barbaad": 0.52, "niklo": 0.58, "nikal": 0.62, "bhagao": 0.58,
+    "bakwaas": 0.52, "chup": 0.42, "kameena": 0.68, "badtameez": 0.55,
+    
+    # Communal & demographic slurs
+    "katwe": 0.92, "katwa": 0.92, "mulle": 0.85, "mulla": 0.85, "jihadi": 0.88,
+    "deshdrohi": 0.88, "gaddar": 0.88, "aatankwadi": 0.92, "neech": 0.70, "chamar": 0.82,
+    "bhangi": 0.82, "khalistani": 0.80, "terrorist": 0.78
 }
 
 BENIGN_DAMPENERS = {
@@ -86,7 +106,8 @@ BENIGN_DAMPENERS = {
     "mazedaar", "mast", "badhai", "mubarak", "shubh", "pyara", "accha", "achha",
     "khoob", "sundar", "badiya", "badhiya", "shukriya", "dhanyawad", "help",
     "madad", "swadisht", "family", "festival", "match", "party", "treat",
-    "enjoy", "peacefully", "celebrated", "peaceful", "wonderful", "movie", "gym", "exam"
+    "enjoy", "peacefully", "celebrated", "peaceful", "wonderful", "movie", "gym", "exam",
+    "picture", "khush", "happy", "congrats", "good", "great", "welcome"
 }
 
 IDENTITY_TERMS = {
@@ -97,9 +118,9 @@ IDENTITY_TERMS = {
 
 def analyze_hinglish_semantics(text: str) -> tuple:
     """
-    Parses conversational and code-mixed Hinglish semantics:
-    - Multi-word hostile phrase patterns (exclusion, threats, communal hostility)
-    - Abusive & derogatory vocabulary weights
+    Parses conversational English and code-mixed Hinglish semantics:
+    - Multi-word hostile phrase patterns (exclusion, threats, personal attacks)
+    - Abusive, profanity, and derogatory vocabulary weights
     - Benign colloquial dampeners (friendly banter, praise, celebrations)
     Returns: (calibrated_score, matched_phrases, found_slurs, found_dampeners)
     """
@@ -115,13 +136,14 @@ def analyze_hinglish_semantics(text: str) -> tuple:
             if weight > phrase_score:
                 phrase_score = weight
                 
-    # 2. Slur & abusive vocab matching
+    # 2. Slur, profanity, and abusive vocab matching (both English & Hinglish)
     slur_score = 0.0
     found_slurs = []
+    all_lex = {**ENGLISH_TOXIC_VOCAB, **HINGLISH_ABUSIVE_VOCAB}
     for t in tokens:
-        if t in HINGLISH_ABUSIVE_VOCAB:
+        if t in all_lex:
             found_slurs.append(t)
-            w = HINGLISH_ABUSIVE_VOCAB[t]
+            w = all_lex[t]
             if w > slur_score:
                 slur_score = w
                 
@@ -132,8 +154,8 @@ def analyze_hinglish_semantics(text: str) -> tuple:
     
     # 3. Benign contextual dampeners (e.g. friendly banter 'bhai', 'mast', 'movie')
     found_dampeners = [t for t in tokens if t in BENIGN_DAMPENERS]
-    if found_dampeners and combined_toxic < 0.60:
-        dampen_factor = max(0.10, 0.35 - 0.08 * len(found_dampeners))
+    if found_dampeners and combined_toxic < 0.65:
+        dampen_factor = max(0.08, 0.30 - 0.08 * len(found_dampeners))
         combined_toxic *= dampen_factor
         
     return combined_toxic, matched_phrases, found_slurs, found_dampeners
