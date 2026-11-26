@@ -48,19 +48,18 @@ SECONDARY_MODEL_ID = "cardiffnlp/twitter-roberta-base-hate-latest"
 # Comprehensive Code-Mixed Hinglish & Multilingual Lexical-Semantic Knowledge
 # ---------------------------------------------------------------------------
 ENGLISH_TOXIC_VOCAB = {
-    "hate": 0.72, "hateful": 0.76, "kill": 0.75, "die": 0.68, "murder": 0.78,
-    "destroy": 0.62, "disgust": 0.60, "ugly": 0.58, "loser": 0.58, "freak": 0.60,
-    "shit": 0.72, "bitch": 0.78, "bastard": 0.74, "asshole": 0.78, "dick": 0.68,
-    "cunt": 0.92, "fucking": 0.68, "fuck": 0.72, "scum": 0.75, "worthless": 0.68,
-    "subhuman": 0.88, "trash": 0.65, "disgusting": 0.58, "moron": 0.62, "idiot": 0.60,
-    "stupid": 0.50, "retard": 0.85, "nigger": 0.98, "faggot": 0.98, "kike": 0.98,
-    "coon": 0.95, "chink": 0.95, "whore": 0.82, "slut": 0.82, "kill yourself": 0.92
+    "shit": 0.75, "bitch": 0.80, "bastard": 0.76, "asshole": 0.80, "dick": 0.68,
+    "cunt": 0.95, "fucking": 0.70, "fuck": 0.72, "scum": 0.78, "worthless": 0.70,
+    "subhuman": 0.90, "trash": 0.68, "retard": 0.88, "nigger": 0.98, "faggot": 0.98,
+    "kike": 0.98, "coon": 0.95, "chink": 0.95, "whore": 0.85, "slut": 0.85
 }
 
 HINGLISH_PHRASE_PATTERNS = [
-    (r"\b(i\s+)?hate\s+(people|everyone|all|you|them|humanity)\b", 0.85, "explicit generalized hate"),
-    (r"\b(kill|murder|destroy)\s+(all|them|people)\b", 0.90, "violent incitement"),
+    (r"\b(i\s+)?hate\s+(people|everyone|all|you|them|humanity|him|her|these\s+guys|this\s+group)\b", 0.85, "interpersonal/generalized hate"),
+    (r"\bhate\s+(muslims?|hindus?|jews?|jewish|blacks?|whites?|christians?|dalits?|women|men|gays?)\b", 0.92, "identity-targeted hate"),
     (r"\bhate\s+speech\b", 0.75, "explicit hate expression"),
+    (r"\b(kill|murder|destroy)\s+(all|them|people|yourself|everyone)\b", 0.90, "violent incitement / threat"),
+    (r"\b(you\s+are\s+(an?\s+)?)(idiot|stupid|moron|clown|worthless)\b", 0.72, "direct personal insult"),
     (r"\bdesh\s+ke\s+(gaddar|dushman)\b", 0.88, "communal/nationalistic hate"),
     (r"\b(deshdrohi|aatankwadi)\b", 0.85, "terrorist/traitor accusation"),
     (r"\brehne\s+ka\s+haq\s+nahi\b", 0.88, "dehumanizing exclusion"),
