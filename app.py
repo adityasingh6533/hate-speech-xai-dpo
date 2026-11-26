@@ -396,16 +396,66 @@ elif selected_tab == "🖼️ 3. Live Multimodal Meme Analyzer (CLIP)":
     st.subheader("🖼️ Live Multimodal Meme Analyzer & ViT Patch Attention (CLIP)")
     st.markdown("""
     Upload any meme or image from your local drive and provide its text caption. 
-    The real **CLIP ViT-B/32** cross-modal engine will process both modalities, compute the 
-    **Image-Text Cosine Similarity**, evaluate the **Multimodal Hate Risk**, and extract the 
+    The real **CLIP ViT-B/32** cross-modal engine processes both modalities, computes the 
+    **Image-Text Cosine Similarity**, evaluates the **Multimodal Hate Risk**, and extracts the 
     **$7 \\times 7$ Vision Transformer spatial patch attention map** overlaid directly onto the image.
     """)
 
-    col_up, col_info = st.columns([1, 1.2])
+    # Initialize session state for multimodal meme analyzer
+    if "meme_img_active" not in st.session_state:
+        st.session_state["meme_img_active"] = None
+    if "meme_caption_text" not in st.session_state:
+        st.session_state["meme_caption_text"] = "when your code compiles on the first try!"
+    if "meme_result_data" not in st.session_state:
+        st.session_state["meme_result_data"] = None
+
+    # Presets row
+    st.markdown("##### 💡 Quick Test Presets (Click any preset or upload your own image below):")
+    p_col1, p_col2, p_col3, p_col4 = st.columns(4)
+
+    benign_path = os.path.join(RESULTS_DIR, "sample_meme_benign.png")
+    hateful_path = os.path.join(RESULTS_DIR, "sample_meme_hateful.png")
+
+    with p_col1:
+        if st.button("Sample 1: Benign Tech Meme", use_container_width=True):
+            if os.path.exists(benign_path):
+                st.session_state["meme_img_active"] = Image.open(benign_path).convert("RGB")
+                st.session_state["meme_caption_text"] = "when your code compiles on the first try!"
+                st.session_state["meme_result_data"] = None
+
+    with p_col2:
+        if st.button("Sample 2: Offensive Identity Meme", use_container_width=True):
+            if os.path.exists(hateful_path):
+                st.session_state["meme_img_active"] = Image.open(hateful_path).convert("RGB")
+                st.session_state["meme_caption_text"] = "targeting and harassing identity groups get out of here"
+                st.session_state["meme_result_data"] = None
+
+    with p_col3:
+        if st.button("Sample 3: Benchmark Heatmap Meme", use_container_width=True):
+            if heatmap_exists:
+                st.session_state["meme_img_active"] = Image.open(heatmap_png_path).convert("RGB")
+                st.session_state["meme_caption_text"] = "cross modal hateful meme benchmark example"
+                st.session_state["meme_result_data"] = None
+
+    with p_col4:
+        if st.button("🗑️ Reset Meme Analyzer", use_container_width=True):
+            st.session_state["meme_img_active"] = None
+            st.session_state["meme_caption_text"] = ""
+            st.session_state["meme_result_data"] = None
+
+    col_up, col_info = st.columns([1.1, 1.2])
 
     with col_up:
         uploaded_file = st.file_uploader("Upload Meme Image (PNG, JPG, WEBP):", type=["png", "jpg", "jpeg", "webp"])
-        meme_caption = st.text_input("Meme Text / Caption:", value="when you realize the plan failed")
+        if uploaded_file is not None:
+            st.session_state["meme_img_active"] = Image.open(uploaded_file).convert("RGB")
+            
+        meme_caption = st.text_input(
+            "Meme Text / Caption:", 
+            value=st.session_state["meme_caption_text"],
+            placeholder="Enter the caption or text written on the meme..."
+        )
+        st.session_state["meme_caption_text"] = meme_caption
 
     with col_info:
         st.markdown("##### 📌 Multimodal Benchmark Performance (Table 5)")
@@ -413,50 +463,53 @@ elif selected_tab == "🖼️ 3. Live Multimodal Meme Analyzer (CLIP)":
             st.dataframe(df_table5, use_container_width=True, hide_index=True)
         st.caption("Evaluated on 80 real RGB memes from the Facebook Hateful Memes test set (`Hatefulmemes_test`). Held-out Accuracy: **87.50%**, Multimodal AUROC: **0.5714 - 0.6032**.")
 
-    # If no file uploaded, provide option to use repository's generated heatmap as preset
-    if uploaded_file is not None:
-        meme_img = Image.open(uploaded_file)
-    elif heatmap_exists:
-        st.info("💡 No file uploaded yet: Showing preset evaluation meme from `results/phase7_image_region_attention_heatmap.png`:")
-        meme_img = Image.open(heatmap_png_path).convert("RGB")
-    else:
-        meme_img = None
+    # Show active image if loaded
+    active_img = st.session_state["meme_img_active"]
 
-    if meme_img is not None:
+    if active_img is not None:
+        st.markdown("---")
         if st.button("🚀 Analyze Meme with CLIP ViT-B/32", type="primary", use_container_width=True):
             with st.spinner("Running CLIP vision + text encoders & computing 7x7 spatial patch attention..."):
-                m_res = analyze_multimodal_meme(meme_img, meme_caption)
-                
-                st.markdown("---")
-                
-                # Metrics Row
-                m1, m2, m3 = st.columns(3)
-                with m1:
-                    if m_res["is_hateful"]:
-                        st.error(f"🚨 **Verdict:** Hateful Meme (Risk = {m_res['multimodal_risk']:.3f})")
-                    else:
-                        st.success(f"✅ **Verdict:** Non-Hateful Meme (Risk = {m_res['multimodal_risk']:.3f})")
-                with m2:
-                    st.metric("Image-Text Cosine Similarity", f"{m_res['cosine_similarity']:.4f}")
-                with m3:
-                    st.metric("CLIP Spatial Engine", "ViT-B/32 (7x7 Patches)", m_res["status"])
+                st.session_state["meme_result_data"] = analyze_multimodal_meme(active_img, meme_caption)
 
-                st.markdown("---")
+    # Render persistent results if available
+    m_res = st.session_state.get("meme_result_data")
+    if m_res is not None and active_img is not None:
+        st.markdown("---")
+        
+        # Metrics Row
+        m1, m2, m3 = st.columns(3)
+        with m1:
+            if m_res.get("is_hateful", False):
+                st.error(f"🚨 **Verdict:** Hateful Meme (Risk = {m_res['multimodal_risk']:.4f})")
+            else:
+                st.success(f"✅ **Verdict:** Non-Hateful Meme (Risk = {m_res['multimodal_risk']:.4f})")
+        with m2:
+            st.metric("Image-Text Cosine Similarity", f"{m_res['cosine_similarity']:.4f}")
+        with m3:
+            st.metric("CLIP Spatial Engine", "ViT-B/32 (7x7 Patches)", m_res["status"])
 
-                # Side-by-side Visuals
-                col_orig, col_attn = st.columns(2)
-                with col_orig:
-                    st.markdown("##### 🖼️ Original Input Meme")
-                    st.image(meme_img, caption="Input RGB Image", use_container_width=True)
-                    
-                with col_attn:
-                    st.markdown("##### 🔥 ViT 7x7 Spatial Patch Attention Heatmap Overlay")
-                    st.image(m_res["heatmap_overlay"], caption="Red/Yellow highlights = High Vision Attention Patches", use_container_width=True)
+        st.markdown("---")
 
-                # Salient Bounding Box Patches
-                st.markdown("#### 🗺️ Top Salient Spatial Image Regions (32x32 Bounding Boxes)")
-                df_patches = pd.DataFrame(m_res["top_patches"])
-                st.dataframe(df_patches, use_container_width=True, hide_index=True)
+        # Side-by-side Visuals
+        col_orig, col_attn = st.columns(2)
+        with col_orig:
+            st.markdown("##### 🖼️ Original Input Meme")
+            st.image(active_img, caption="Input RGB Image", use_container_width=True)
+            
+        with col_attn:
+            st.markdown("##### 🔥 ViT 7x7 Spatial Patch Attention Heatmap Overlay")
+            st.image(m_res["heatmap_overlay"], caption="Red/Yellow highlights = High Vision Attention Patches", use_container_width=True)
+
+        # Salient Bounding Box Patches
+        st.markdown("#### 🗺️ Top Salient Spatial Image Regions (32x32 Bounding Boxes)")
+        df_patches = pd.DataFrame(m_res["top_patches"])
+        st.dataframe(df_patches, use_container_width=True, hide_index=True)
+    elif active_img is not None:
+        st.markdown("##### 🖼️ Selected Meme Preview (Click 'Analyze Meme' button above to run):")
+        st.image(active_img, caption="Ready for Multimodal CLIP Analysis", width=350)
+    else:
+        st.info("👆 Please upload an image or click one of the preset sample buttons above to get started!")
 
 
 # ===========================================================================
