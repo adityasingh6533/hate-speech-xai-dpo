@@ -405,40 +405,48 @@ elif selected_tab == "🖼️ 3. Live Multimodal Meme Analyzer (CLIP)":
     if "meme_img_active" not in st.session_state:
         st.session_state["meme_img_active"] = None
     if "meme_caption_text" not in st.session_state:
-        st.session_state["meme_caption_text"] = "when your code compiles on the first try!"
+        st.session_state["meme_caption_text"] = ""
     if "meme_result_data" not in st.session_state:
         st.session_state["meme_result_data"] = None
 
     # Presets row
-    st.markdown("##### 💡 Quick Test Presets (Click any preset or upload your own image below):")
-    p_col1, p_col2, p_col3, p_col4 = st.columns(4)
+    st.markdown("##### 💡 Quick Test Presets (Click any preset to test instantly or upload your own meme below):")
+    p_col1, p_col2, p_col3, p_col4, p_col5 = st.columns(5)
 
     benign_path = os.path.join(RESULTS_DIR, "sample_meme_benign.png")
     hateful_path = os.path.join(RESULTS_DIR, "sample_meme_hateful.png")
+    dehuman_path = os.path.join(RESULTS_DIR, "sample_meme_dehumanization.jpg")
 
     with p_col1:
-        if st.button("Sample 1: Benign Tech Meme", use_container_width=True):
+        if st.button("Sample 1: Benign Meme", use_container_width=True):
             if os.path.exists(benign_path):
                 st.session_state["meme_img_active"] = Image.open(benign_path).convert("RGB")
                 st.session_state["meme_caption_text"] = "when your code compiles on the first try!"
                 st.session_state["meme_result_data"] = None
 
     with p_col2:
-        if st.button("Sample 2: Offensive Identity Meme", use_container_width=True):
+        if st.button("Sample 2: Explicit Identity Hate", use_container_width=True):
             if os.path.exists(hateful_path):
                 st.session_state["meme_img_active"] = Image.open(hateful_path).convert("RGB")
                 st.session_state["meme_caption_text"] = "targeting and harassing identity groups get out of here"
                 st.session_state["meme_result_data"] = None
 
     with p_col3:
-        if st.button("Sample 3: Benchmark Heatmap Meme", use_container_width=True):
+        if st.button("Sample 3: Heatmap Benchmark", use_container_width=True):
             if heatmap_exists:
                 st.session_state["meme_img_active"] = Image.open(heatmap_png_path).convert("RGB")
                 st.session_state["meme_caption_text"] = "cross modal hateful meme benchmark example"
                 st.session_state["meme_result_data"] = None
 
     with p_col4:
-        if st.button("🗑️ Reset Meme Analyzer", use_container_width=True):
+        if st.button("Sample 4: MLK / Apes Benchmark", use_container_width=True):
+            if os.path.exists(dehuman_path):
+                st.session_state["meme_img_active"] = Image.open(dehuman_path).convert("RGB")
+                st.session_state["meme_caption_text"] = "MARTIN LUTHER KING 1960 SPEAKING FOR THE CIVIL RIGHT MOVEMENT Apes together strong"
+                st.session_state["meme_result_data"] = None
+
+    with p_col5:
+        if st.button("🗑️ Reset Analyzer", use_container_width=True):
             st.session_state["meme_img_active"] = None
             st.session_state["meme_caption_text"] = ""
             st.session_state["meme_result_data"] = None
@@ -451,11 +459,12 @@ elif selected_tab == "🖼️ 3. Live Multimodal Meme Analyzer (CLIP)":
             st.session_state["meme_img_active"] = Image.open(uploaded_file).convert("RGB")
             
         meme_caption = st.text_input(
-            "Meme Text / Caption:", 
+            "Meme Text / Caption (written on the meme):", 
             value=st.session_state["meme_caption_text"],
-            placeholder="Enter the caption or text written on the meme..."
+            placeholder="Type the exact text written on the meme (e.g., MARTIN LUTHER KING 1960 SPEAKING FOR THE CIVIL RIGHT MOVEMENT)..."
         )
         st.session_state["meme_caption_text"] = meme_caption
+        st.caption("ℹ️ **Multimodal Rule:** In cross-modal hate, the text written on the meme must be provided so CLIP can align visual patches with textual semantics.")
 
     with col_info:
         st.markdown("##### 📌 Multimodal Benchmark Performance (Table 5)")
