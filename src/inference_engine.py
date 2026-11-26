@@ -48,6 +48,8 @@ SECONDARY_MODEL_ID = "cardiffnlp/twitter-roberta-base-hate-latest"
 # Comprehensive Code-Mixed Hinglish & Multilingual Lexical-Semantic Knowledge
 # ---------------------------------------------------------------------------
 ENGLISH_TOXIC_VOCAB = {
+    "hate": 0.72, "hateful": 0.76, "kill": 0.75, "die": 0.68, "murder": 0.78,
+    "destroy": 0.62, "disgust": 0.60, "ugly": 0.58, "loser": 0.58, "freak": 0.60,
     "shit": 0.72, "bitch": 0.78, "bastard": 0.74, "asshole": 0.78, "dick": 0.68,
     "cunt": 0.92, "fucking": 0.68, "fuck": 0.72, "scum": 0.75, "worthless": 0.68,
     "subhuman": 0.88, "trash": 0.65, "disgusting": 0.58, "moron": 0.62, "idiot": 0.60,
@@ -56,6 +58,9 @@ ENGLISH_TOXIC_VOCAB = {
 }
 
 HINGLISH_PHRASE_PATTERNS = [
+    (r"\b(i\s+)?hate\s+(people|everyone|all|you|them|humanity)\b", 0.85, "explicit generalized hate"),
+    (r"\b(kill|murder|destroy)\s+(all|them|people)\b", 0.90, "violent incitement"),
+    (r"\bhate\s+speech\b", 0.75, "explicit hate expression"),
     (r"\bdesh\s+ke\s+(gaddar|dushman)\b", 0.88, "communal/nationalistic hate"),
     (r"\b(deshdrohi|aatankwadi)\b", 0.85, "terrorist/traitor accusation"),
     (r"\brehne\s+ka\s+haq\s+nahi\b", 0.88, "dehumanizing exclusion"),
@@ -575,12 +580,22 @@ def analyze_multimodal_meme(image: Image.Image, caption: str) -> dict:
                 heatmap_img, top_patches = _generate_heatmap_overlay(img_rgb, grid_norm)
                 
                 # Multimodal Risk Score
-                multimodal_risk = float(np.clip(0.55 * text_p_hate + 0.45 * max(0.0, cos_sim), 0.0, 1.0))
+                # If text is hateful (text_p_hate >= 0.50), the meme is flagged as hateful,
+                # with cross-modal visual alignment amplifying the risk score.
+                if text_p_hate >= 0.50:
+                    multimodal_risk = float(np.clip(max(text_p_hate, 0.70 * text_p_hate + 0.30 * (cos_sim * 2.5)), 0.0, 1.0))
+                    is_hateful = True
+                elif text_p_hate >= 0.35 and cos_sim > 0.28:
+                    multimodal_risk = float(np.clip(text_p_hate + 0.20 * cos_sim, 0.0, 1.0))
+                    is_hateful = (multimodal_risk >= 0.50)
+                else:
+                    multimodal_risk = float(np.clip(text_p_hate * 0.85 + 0.15 * max(0.0, cos_sim - 0.25), 0.0, 1.0))
+                    is_hateful = (multimodal_risk >= 0.50)
                 
                 return {
                     "cosine_similarity": cos_sim,
                     "multimodal_risk": multimodal_risk,
-                    "is_hateful": multimodal_risk >= 0.50,
+                    "is_hateful": is_hateful,
                     "heatmap_overlay": heatmap_img,
                     "grid_attention": grid_norm,
                     "top_patches": top_patches,
@@ -644,12 +659,20 @@ def _generate_fallback_multimodal(img_rgb: Image.Image, caption: str, text_p_hat
     
     heatmap_img, top_patches = _generate_heatmap_overlay(img_rgb, grid_7x7)
     cos_sim = float(np.random.uniform(0.24, 0.38))
-    multimodal_risk = float(np.clip(0.60 * text_p_hate + 0.40 * cos_sim, 0.0, 1.0))
+    if text_p_hate >= 0.50:
+        multimodal_risk = float(np.clip(max(text_p_hate, 0.70 * text_p_hate + 0.30 * (cos_sim * 2.5)), 0.0, 1.0))
+        is_hateful = True
+    elif text_p_hate >= 0.35 and cos_sim > 0.28:
+        multimodal_risk = float(np.clip(text_p_hate + 0.20 * cos_sim, 0.0, 1.0))
+        is_hateful = (multimodal_risk >= 0.50)
+    else:
+        multimodal_risk = float(np.clip(text_p_hate * 0.85 + 0.15 * max(0.0, cos_sim - 0.25), 0.0, 1.0))
+        is_hateful = (multimodal_risk >= 0.50)
     
     return {
         "cosine_similarity": cos_sim,
         "multimodal_risk": multimodal_risk,
-        "is_hateful": multimodal_risk >= 0.50,
+        "is_hateful": is_hateful,
         "heatmap_overlay": heatmap_img,
         "grid_attention": grid_7x7,
         "top_patches": top_patches,
