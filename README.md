@@ -1,39 +1,86 @@
 # Hate Speech Detection through Explainable AI and Reward-Optimized LLMs
 
-**Project ID:** PJ_03 (NLP Lab)  
-**Author:** Aditya Kumar Singh (Bennett University)  
+**Project ID:** PJ_03 (CSET-346 NLP Lab, Milestone-2 Evaluation)  
+**Lead:** Aditya Kumar Singh & Team (Bennett University)  
 **Instructor:** Dr. Pradeepika Verma  
+**Full Report:** [docs/MILESTONE_2_REPORT.md](docs/MILESTONE_2_REPORT.md)
 
 ---
 
 ## 📌 Project Overview
-Online content moderation requires models that are not only accurate across multilingual and code-mixed texts but also transparent, explainable, and fair. This project implements an end-to-end research pipeline that combines **multilingual transformer encoders (XLM-R)**, **post-hoc explainability (SHAP & LIME)**, and **reward-optimized generative LLMs (QLoRA SFT + Direct Preference Optimization)** to detect hate speech while providing faithful, human-aligned rationales.
+Online content moderation requires models that are not only accurate across multilingual and code-mixed texts but also transparent, explainable, and fair. This project implements an end-to-end research pipeline that combines **multilingual transformer encoders (XLM-R)**, **post-hoc explainability (SHAP & LIME)**, **reward-optimized generative LLMs (4-bit QLoRA SFT + Direct Preference Optimization & PPO)**, **counterfactual fairness audits (CDA)**, and **multimodal CLIP meme detection** with spatial patch attention heatmaps.
 
 ---
 
-## 🚀 Key Objectives & Architecture
-1. **Multilingual Detection:** Robust hate speech and offensive language classification using `xlm-roberta-base`.
-2. **Explainability Module:** Post-hoc attribution analysis via **SHAP** and **LIME**, evaluated for human plausibility (Token-F1, IoU) and model faithfulness (Comprehensiveness, Sufficiency).
-3. **Reward-Optimized LLM Alignment:** Fine-tuning `Qwen/Qwen2.5-1.5B-Instruct` using 4-bit QLoRA and optimizing policy outputs via **Direct Preference Optimization (DPO)** using a multi-objective reward function (label accuracy, rationale Jaccard overlap, and anti-hacking length penalty).
-4. **Multilingual & Fairness Audit:** Zero-shot cross-lingual evaluation on code-mixed Hinglish benchmarks and demographic bias audits measuring group-wise False Positive Rate (FPR) disparities across identity mentions.
+## 👥 Team Roles & Verified Deliverables
+
+| Team Member | Core Responsibilities & Verified Deliverables |
+| :--- | :--- |
+| **Aditya Singh** | **Lead ML Architect & LLM Alignment:**<br>Colab GPU pipeline, Qwen2.5-1.5B 4-bit QLoRA SFT ($r=16, \alpha=32$), TRL DPO training loop (loss: $0.2543 \to 0.0060$), DistilRoBERTa Reward Model (100% acc) & PPO RL (+0.5430 mean reward). |
+| **Member 2 [Edit]** | **Data Engineering & Counterfactual Fairness:**<br>HateXplain preprocessing, multi-annotator agreement rules, Counterfactual Data Augmentation (CDA with 5,981 twins; $N=21,364$), 10-group FPR disparity audit & CFR metric ($0.1324 \to 0.0197$). |
+| **Member 3 [Edit]** | **Multilingual NLP & Hinglish Evaluation:**<br>XLM-RoBERTa cross-lingual fine-tuning, zero-duplicate Hinglish benchmark curation ($N=300$; Macro-F1: 0.5409, Acc: 63.67%), and code-mixed threat phrase / colloquial dampener modeling. |
+| **Member 4 [Edit]** | **Explainable AI (XAI) & Interpretability:**<br>SHAP & LIME token-attribution pipelines, evaluation against HateXplain human rationales (Sufficiency, Comprehensiveness, AOPC), and Leave-One-Out marginal perturbation ($\Delta P$) attribution engine. |
+| **Member 5 [Edit]** | **Multimodal Vision-Language & Web Deployment:**<br>CLIP ViT-B/32 cross-modal fusion on memes (held-out acc: 0.8750), Vision Transformer $7 \times 7$ spatial patch attention heatmap overlay, and interactive Streamlit web dashboard (`app.py`). |
+
+---
+
+## 🚀 Key Results & Benchmarks
+
+| Milestone Benchmark | Key Metric | Result / Status |
+|---|---|---|
+| **XLM-RoBERTa Fine-Tuned** | Test Macro-F1 / AUROC | **78.06% F1** / **0.8713 AUROC** |
+| **Explainability (SHAP/LIME)** | Human Token-F1 ($N=100$) | **0.7573 Token-F1** (vs. 0.3265 random) |
+| **QLoRA SFT + DPO Policy** | DPO Loss Convergence | **$0.2543 \to 0.0060$** (Qwen2.5-1.5B) |
+| **Reward Model (DistilRoBERTa)** | Preference Pair Accuracy | **100.0%** (PPO mean reward: +0.5430) |
+| **Counterfactual Invariance (CDA)** | Counterfactual Flip Rate (CFR) | **$0.1324 \to 0.0197$** (85.1% flip reduction) |
+| **Multilingual Hinglish ($N=300$)** | Macro-F1 / Accuracy | **0.5409 F1** / **63.67% Acc** |
+| **Multimodal Memes (CLIP ViT-B/32)** | Held-out Accuracy | **87.50%** ($7 \times 7$ patch attention maps) |
+
+---
+
+## 💻 Running the Live Interactive Web Application
+
+Launch the real-time AI moderation dashboard (supports live English & Hinglish inference, Leave-One-Out token XAI charts, counterfactual identity sandbox, and multimodal meme image analysis):
+
+```powershell
+python -m streamlit run app.py
+```
+Or double-click:
+```powershell
+.\run_app.bat
+```
 
 ---
 
 ## 📂 Repository Structure
 ```text
-hate-speech-detection-xai-dpo/
+hate-speech-xai-dpo/
 │
-├── README.md                  # Project documentation
-├── requirements.txt           # Python dependencies
+├── app.py                                         # 4-tab Interactive Streamlit Web Application
+├── run_app.bat / run_app.ps1                      # Application launchers
+├── requirements.txt                               # Environment dependencies
+├── README.md                                      # Project overview & documentation
 │
-├── notebooks/                 # Step-by-step Google Colab notebooks
-│   ├── 01_data_preprocessing.ipynb
-│   ├── 02_xlmr_baseline_training.ipynb
-│   ├── 03_explainability_shap_lime.ipynb
-│   └── 04_qlora_sft_dpo_training.ipynb
+├── docs/                                          # Milestone-2 evaluation reports & presentation
+│   └── MILESTONE_2_REPORT.md                      # Full CSET-346 Milestone-2 Progress Report
 │
-└── results/                   # Saved experimental metrics & tables
-    ├── table2_explainability_complete.csv
-    ├── table4_sft_vs_dpo_ablation.csv
-    ├── table3_multilingual_hinglish.csv
-    └── table3_fairness_bias_audit.csv
+├── src/                                           # Production Inference Engine
+│   ├── __init__.py
+│   └── inference_engine.py                        # Pretrained models, Leave-One-Out XAI & CLIP
+│
+├── notebooks/                                     # Google Colab Research Pipeline
+│   ├── 01_data_preprocessing.ipynb                # HateXplain EDA & CDA generation
+│   ├── 02_xlmr_baseline_training.ipynb            # Multilingual XLM-R fine-tuning
+│   ├── 03_explainability_shap_lime.ipynb          # SHAP/LIME Token-F1 & Faithfulness
+│   ├── 04_qlora_sft_dpo_training.ipynb            # Qwen2.5-1.5B QLoRA SFT & DPO
+│   └── 05_dpo_ppo_fairness_multimodal.ipynb       # Reward Model, PPO, Fairness & CLIP
+│
+└── results/                                       # Checkpointed experimental tables & figures
+    ├── table2_explainability_complete.csv         # SHAP/LIME faithfulness benchmarks
+    ├── table3_fairness_bias_audit.csv             # 10-group demographic FPR audit
+    ├── table3_multilingual_hinglish.csv           # Code-mixed Hinglish evaluation
+    ├── table4_sft_vs_dpo_ablation.csv             # SFT vs DPO vs PPO policy comparison
+    ├── table5_multimodal_clip.csv                 # Multimodal meme metrics
+    ├── phase3_qualitative_examples.json           # Qualitative rationale predictions
+    └── phase7_image_region_attention_heatmap.png  # ViT 7x7 spatial patch attention heatmap
+```
