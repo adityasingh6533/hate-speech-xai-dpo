@@ -1,0 +1,12 @@
+Identity Group,Sample Count (N),False Positives (FP),Baseline FPR,CDA Mitigated FPR,Disparity Gap (CDA),Status
+Overall (All Non-Hateful Test Posts),782,277,0.3593,0.3542,0.0,Verified (Sufficient Data)
+muslim,28,8,0.2857,0.2857,-0.0685,Verified (N >= 5)
+jewish,4,4,Insufficient Data (N < 5),Insufficient Data (N < 5),N/A (Insufficient Data),Insufficient Data (N=4)
+black,45,12,0.3556,0.2667,-0.0876,Verified (N >= 5)
+gay,22,4,0.1818,0.1818,-0.1724,Verified (N >= 5)
+woman,8,1,0.25,0.125,-0.2292,Verified (N >= 5)
+women,62,13,0.1613,0.2097,-0.1445,Verified (N >= 5)
+hindu,4,0,Insufficient Data (N < 5),Insufficient Data (N < 5),N/A (Insufficient Data),Insufficient Data (N=4)
+christian,2,2,Insufficient Data (N < 5),Insufficient Data (N < 5),N/A (Insufficient Data),Insufficient Data (N=2)
+dalit,0,0,Insufficient Data (N < 5),Insufficient Data (N < 5),N/A (Insufficient Data),Insufficient Data (N=0)
+white,169,33,0.1953,0.1953,-0.159,Verified (N >= 5)

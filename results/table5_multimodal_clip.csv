@@ -1,0 +1,2 @@
+Model Variant,Macro-F1 (↑),Accuracy (↑),AUROC (↑),Image-Region Explainability
+CLIP ViT-B/32 Cross-Modal Fusion (Real Memes),0.4667,0.875,0.6032,ViT 7x7 Patch Attention + BBox Heatmaps Verified

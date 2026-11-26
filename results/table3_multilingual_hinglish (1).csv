@@ -1,0 +1,2 @@
+Benchmark,Macro-F1,Accuracy,AUROC,Counterfactual Flip Rate (CFR)
+"Unique Code-Mixed Evaluation (N=300, Zero Duplicates)",0.5409,0.6367,0.6314,0.0197
